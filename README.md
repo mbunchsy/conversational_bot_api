@@ -92,14 +92,8 @@ The application follows a Clean Architecture pattern with these main layers:
 
 ### 🧱 System Architecture
 
-.| User Input | --> | Django REST API | --> | Use Case Layer |
-.+----------------+ +---------------------+ +-----------------------+
-.                                                 | | |
-.                                                 | | |
-.                                    +------+------+ +------+------+
-.                                    | MessageRepo | | LLMService |
-.                                    | UserRepo | | RAGService |
-.                                    +-------------+ +--------------+
+<img width="1235" alt="Captura de pantalla 2025-03-25 a las 22 30 48" src="https://github.com/user-attachments/assets/cec9cd76-6b36-4ca7-84f7-2593d960bd03" />
+
 
 [PGVector DB] <---> Document Ingestor + Similarity Search
 
@@ -140,45 +134,13 @@ The application follows a Clean Architecture pattern with these main layers:
 
 ## Potential Improvements
 
-1. **Technical Improvements**
-
-   - Add integration tests
-   - Implement caching layer
-   - Add API documentation (e.g., OpenAPI/Swagger)
-   - Add monitoring and logging
-   - Implement rate limiting
-   - Add authentication and authorization
-
-2. **Feature Enhancements**
-
-   - Support for multiple LLM providers
-   - Conversation analytics
-   - Bulk operations support
-   - Real-time updates
-   - Message attachments support
-
-3. **Performance Optimizations**
-
-   - Implement conversation archiving
-   - Add message pagination
-   - Optimize token counting
-   - Add database indexes
-   - Implement caching strategies
-
-4. **Developer Experience**
-
-   - Add development environment setup script
-   - Improve error messages
-   - Add more code examples
-   - Create contribution guidelines
-   - Add CI/CD pipeline
-
-5. **Documentation**
-   - Add API documentation
-   - Include architecture diagrams
-   - Add code examples
-   - Document best practices
-   - Create troubleshooting guide
+  - Authentication & Authorization: Secures your API and lets you control who can access and do what — essential for scaling and multi-user environments.
+  - Real-time updates: Delivers a modern, responsive UX by pushing updates instantly — ideal for live messaging and better user engagement.
+  - Add API documentation (e.g., OpenAPI/Swagger): Makes your API easy to understand and integrate, reducing confusion and speeding up collaboration.
+  - Prompting: Well-structured prompts improve response quality, control tone, and adapt behavior — critical when using LLMs.
+  - Add message pagination: Boosts performance and scalability by handling long conversations more efficiently.
+  - Add monitoring and logging: Provides visibility into system health, helping you catch issues early and optimize behavior based on real usage.
+  - Add integration tests: Ensure the full system works as expected — not just in pieces, but end-to-end, which builds confidence and stability.
   
 ## [sample conversation](./sample_conversation)
 
