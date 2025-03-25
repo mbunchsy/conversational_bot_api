@@ -143,5 +143,5 @@ The application follows a Clean Architecture pattern with these main layers:
   - Add monitoring and logging: Provides visibility into system health, helping you catch issues early and optimize behavior based on real usage.
   - Add integration tests: Ensure the full system works as expected — not just in pieces, but end-to-end, which builds confidence and stability.
   
-## [sample conversation](./sample_conversation)
+## [sample conversation](sample_conversation)
 
