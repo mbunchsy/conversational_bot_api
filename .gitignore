@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Environment variables
+environments/.env.local
+
+# Django
+*.log
+db.sqlite3
+media/
+static/
+staticfiles/
+*.pot
+*.pyc
+*.mo
+
+# Migrations
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
+
+# Project specific
+sample_conversation.txt
+res.http
+rag_cache/
+embeddings_cache.json
+
+# OS
+.DS_Store
+Thumbs.db
