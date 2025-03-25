@@ -94,8 +94,9 @@ The application follows a Clean Architecture pattern with these main layers:
 
 <img width="1235" alt="Captura de pantalla 2025-03-25 a las 22 30 48" src="https://github.com/user-attachments/assets/cec9cd76-6b36-4ca7-84f7-2593d960bd03" />
 
+## [`ProcessMessageUseCase`](chatapp/application/process_message_use_case.py)
 
-[PGVector DB] <---> Document Ingestor + Similarity Search
+<img width="1063" alt="Captura de pantalla 2025-03-25 a las 22 53 08" src="https://github.com/user-attachments/assets/e05ddc27-ee5c-4140-b077-96df5d57df22" />
 
 ### Key Design Decisions
 
