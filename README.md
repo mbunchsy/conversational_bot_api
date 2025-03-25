@@ -87,14 +87,14 @@ The application follows a Clean Architecture pattern with these main layers:
 
 ### 🧱 System Architecture
 
-#| User Input | --> | Django REST API | --> | Use Case Layer |
-#+----------------+ +---------------------+ +-----------------------+
-#                                                 | | |
-#                                                 | | |
-#                                    +------+------+ +------+------+
-#                                    | MessageRepo | | LLMService |
-#                                    | UserRepo | | RAGService |
-#                                    +-------------+ +--------------+
+.| User Input | --> | Django REST API | --> | Use Case Layer |
+.+----------------+ +---------------------+ +-----------------------+
+.                                                 | | |
+.                                                 | | |
+.                                    +------+------+ +------+------+
+.                                    | MessageRepo | | LLMService |
+.                                    | UserRepo | | RAGService |
+.                                    +-------------+ +--------------+
 
 [PGVector DB] <---> Document Ingestor + Similarity Search
 
