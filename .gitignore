@@ -39,7 +39,6 @@ htmlcov/
 coverage.xml
 
 # Project specific
-sample_conversation.txt
 res.http
 rag_cache/
 embeddings_cache.json
