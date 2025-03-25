@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-This project is a conversational API system developed using Django and PostgreSQL, designed as a technical assignment for a senior AI engineer role. It supports:
+This project is a conversational API system developed using Django and PostgreSQL, designed as a technical assignment for a AI engineer role. It supports:
 • Multi-turn conversations
 • System prompts
 • Audio and text input
