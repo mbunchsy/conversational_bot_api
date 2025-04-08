@@ -21,6 +21,7 @@ class CreateConversationSummaryView(APIView):
                 "conversation_status": "This field is required and must be a string."
             })
 
-        conversation = self.use_case.execute(conversation_id, ConversationStatus(conversation_status))
+        self.use_case.execute(conversation_id, ConversationStatus(conversation_status))
 
-        return Response(ConversationPresenter(conversation).data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        

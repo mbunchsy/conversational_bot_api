@@ -37,38 +37,93 @@ make install
 make shell
 ```
 
-4. Run tests:
+5. Run tests:
 
 ```bash
 make test-all
 ```
 
-## 🧪 Environment
+## 🧪 Environment Setup
 
 ```bash
 cp ./environments/.env.local.example ./environments/.env.local
+cp ./environments/.env.local.example ./environments/.env.docker
 ```
 
-## 🚀 Run the project
+Edit `.env.local` and `.env.docker` and set your OpenAI API key:
+
+```
+OPENAI_API_KEY=your-api-key-here
+```
+
+🛠 Note: Make sure that the value of DATABASE_HOST is:
+• localhost in .env.local (when running the app locally)
+• db in .env.docker (when running via Docker Compose)
+
+## 🚀 Running the Project with Docker Compose
+
+1. Build the Docker images:
 
 ```bash
-make docker-init
+make docker-build
 ```
-## Load documents for vector database
+
+2. Start the services:
+
 ```bash
-make load-documents
+make docker-up
 ```
 
+3. Run database migrations:
 
-This will:
-• Build containers
-• Start services
-• Run Django migrations
-• Expose API at http://localhost:8000/
+```bash
+make docker-migrate
+```
 
-## System Architecture Overview
+Note: You can use `make docker-init` to run all the above commands in sequence.
 
-The application follows a Clean Architecture pattern with these main layers:
+4. Load documents for vector database:
+
+```bash
+make docker-load-documents DIR=./docs
+```
+
+5. To stop and remove all containers:
+
+```bash
+make docker-down
+```
+
+The API will be available at http://localhost:8000/
+
+## 🎨 User Interface
+
+The project includes a Streamlit-based user interface with the following features:
+
+- Text chat with RAG support
+- Audio message processing (supports WAV and MP3)
+- Conversation management
+- Language selection
+
+To use it:
+
+1. Install UI dependencies:
+
+```bash
+make install-ui
+```
+
+2. Run the Streamlit interface:
+
+```bash
+make run-ui
+```
+
+Access the UI at http://localhost:8501
+
+## 🏗️ System Architecture
+
+The application follows Hexagonal Architecture with these layers:
 
 ### Domain Layer
 
@@ -100,7 +155,7 @@ The application follows a Clean Architecture pattern with these main layers:
 
 ### Key Design Decisions
 
-1. **Clean Architecture**
+1. **Hexagonal Architecture**
 
    - Clear separation of concerns
    - Domain-driven design principles
@@ -135,13 +190,12 @@ The application follows a Clean Architecture pattern with these main layers:
 
 ## Potential Improvements
 
-  - Authentication & Authorization: Secures your API and lets you control who can access and do what — essential for scaling and multi-user environments.
-  - Real-time updates: Delivers a modern, responsive UX by pushing updates instantly — ideal for live messaging and better user engagement.
-  - Add API documentation (e.g., OpenAPI/Swagger): Makes your API easy to understand and integrate, reducing confusion and speeding up collaboration.
-  - Prompting: Well-structured prompts improve response quality, control tone, and adapt behavior — critical when using LLMs.
-  - Add message pagination: Boosts performance and scalability by handling long conversations more efficiently.
-  - Add monitoring and logging: Provides visibility into system health, helping you catch issues early and optimize behavior based on real usage.
-  - Add integration tests: Ensure the full system works as expected — not just in pieces, but end-to-end, which builds confidence and stability.
-  
-## [sample conversation](./sample_conversation.txt)
+- Authentication & Authorization: Secures your API and lets you control who can access and do what — essential for scaling and multi-user environments.
+- Real-time updates: Delivers a modern, responsive UX by pushing updates instantly — ideal for live messaging and better user engagement.
+- Add API documentation (e.g., OpenAPI/Swagger): Makes your API easy to understand and integrate, reducing confusion and speeding up collaboration.
+- Prompting: Well-structured prompts improve response quality, control tone, and adapt behavior — critical when using LLMs.
+- Add message pagination: Boosts performance and scalability by handling long conversations more efficiently.
+- Add monitoring and logging: Provides visibility into system health, helping you catch issues early and optimize behavior based on real usage.
+- Add integration tests: Ensure the full system works as expected — not just in pieces, but end-to-end, which builds confidence and stability.
 
+## [sample conversation](./sample_conversation.txt)

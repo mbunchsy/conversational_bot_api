@@ -11,3 +11,4 @@ class ForbiddenError(DomainError):
             status=404,
             details=details
         )
+        

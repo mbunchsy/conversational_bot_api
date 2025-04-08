@@ -13,18 +13,8 @@ run:
 	poetry run python manage.py runserver
 	
 # Test
-test:
-	PYTHONPATH=. poetry run python manage.py test -v 2
-
 test-all:
-	PYTHONPATH=. poetry run pytest chatapp/tests -v
-
-test-verbose:
-	PYTHONPATH=. poetry run python manage.py test -v 2
-
-test-coverage:
-	PYTHONPATH=. poetry run coverage run -m pytest chatapp/tests -v
-	poetry run coverage report
+	PYTHONPATH=. DJANGO_SETTINGS_MODULE=config.settings poetry run pytest chatapp/tests -v --ds=config.settings
 
 shell:
 	poetry run python manage.py shell
@@ -42,8 +32,15 @@ update: install makemigrations migrate
 load-documents:
 	poetry run python manage.py load_documents $(DIR)
 
+# UI commands
+install-ui:
+	poetry install --with ui
+
+run-ui:
+	PYTHONPATH=$(PWD) poetry run streamlit run ui/main.py
+
 # Docker commands
-ENV_FILE=./environments/.env.local
+ENV_FILE=./environments/.env.docker
 
 docker-up:
 	docker-compose --env-file $(ENV_FILE) up -d
@@ -52,7 +49,7 @@ docker-down:
 	docker-compose --env-file $(ENV_FILE) down -v
 
 docker-build:
-	docker-compose --env-file $(ENV_FILE) build
+	poetry lock && docker-compose --env-file $(ENV_FILE) build
 
 docker-init: docker-build docker-up docker-migrate
 
@@ -70,3 +67,10 @@ docker-shell:
 
 docker-db:
 	docker-compose exec db psql -U $$(grep POSTGRES_USER $(ENV_FILE) | cut -d '=' -f2) -d $$(grep POSTGRES_DB $(ENV_FILE) | cut -d '=' -f2)
+
+docker-load-documents:
+	@echo "Copying documents to container..."
+	@docker cp $(DIR) bot_api:/app/docs
+	@echo "Loading documents into database..."
+	@docker-compose exec web poetry run python manage.py load_documents /app/docs
+	@echo "Documents loaded successfully"

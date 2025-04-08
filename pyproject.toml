@@ -19,9 +19,14 @@ tiktoken = "^0.9.0"
 pgvector = "^0.4.0"
 psycopg2 = "^2.9.10"
 
+[tool.poetry.group.ui.dependencies]
+streamlit = "^1.44.1"
+requests = "^2.32.3"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
+pytest-django = "^4.11.1"
 
 [build-system]
 requires = ["poetry-core"]

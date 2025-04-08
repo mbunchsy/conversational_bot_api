@@ -22,17 +22,18 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
             llm_service=self.llm_service
         )
         
-        # Common test data
         self.user = UserEntity(_id=str(uuid4()), name="Test User")
         self.conversation_id = str(uuid4())
         self.conversation = ConversationEntity(user=self.user, _id=self.conversation_id)
 
     def test_create_summary_successfully(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
-        self.conversation_repository.update.return_value = self.conversation
+        
+        def update_and_return(conversation):
+            return conversation
+            
+        self.conversation_repository.update.side_effect = update_and_return
 
-        # Create a list to store the prompts used in each call
         prompts_used = []
         def capture_prompt(conversation):
             prompts_used.append(conversation.system_prompt.content)
@@ -40,16 +41,13 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         
         self.llm_service.generate_response.side_effect = capture_prompt
 
-        # Act
         result = self.use_case.execute(self.conversation_id, ConversationStatus.COMPLETED)
 
-        # Assert
         self.assertEqual(result, self.conversation)
         self.assertEqual(result.summary, "Test summary")
         self.assertEqual(result.extracted_data, "Test extraction")
         self.assertEqual(result.status, ConversationStatus.COMPLETED)
 
-        # Verify system prompts were updated correctly
         self.assertEqual(len(prompts_used), 2)
         self.assertEqual(prompts_used[0], SYSTEM_PROMPT_SUMMARY)
         self.assertEqual(prompts_used[1], SYSTEM_PROMPT_DATE_EXTRACTION)
@@ -57,10 +55,8 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_called_once_with(self.conversation)
 
     def test_conversation_not_found(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = None
 
-        # Act & Assert
         with self.assertRaises(NotFoundError) as context:
             self.use_case.execute(self.conversation_id, ConversationStatus.COMPLETED)
         
@@ -70,11 +66,9 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_not_called()
 
     def test_llm_service_error_during_summary(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.llm_service.generate_response.side_effect = Exception("LLM Error")
 
-        # Act & Assert
         with self.assertRaises(InternalError) as context:
             self.use_case.execute(self.conversation_id, ConversationStatus.FAILED)
         
@@ -84,7 +78,6 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_not_called()
 
     def test_llm_service_error_during_extraction(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         summary_response = MessageEntity(role=MessageRole.ASSISTANT, content="Test summary")
         self.llm_service.generate_response.side_effect = [
@@ -92,7 +85,6 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
             Exception("LLM Error")
         ]
 
-        # Act & Assert
         with self.assertRaises(InternalError) as context:
             self.use_case.execute(self.conversation_id, ConversationStatus.FAILED)
         
@@ -102,14 +94,12 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_not_called()
 
     def test_repository_update_error(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         summary_response = MessageEntity(role=MessageRole.ASSISTANT, content="Test summary")
         extraction_response = MessageEntity(role=MessageRole.ASSISTANT, content="Test extraction")
         self.llm_service.generate_response.side_effect = [summary_response, extraction_response]
         self.conversation_repository.update.side_effect = Exception("DB Error")
 
-        # Act & Assert
         with self.assertRaises(InternalError) as context:
             self.use_case.execute(self.conversation_id, ConversationStatus.COMPLETED)
         
@@ -119,7 +109,6 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_called_once()
 
     def test_status_update(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.conversation_repository.update.return_value = self.conversation
 
@@ -137,7 +126,6 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
             ])
         self.llm_service.generate_response.side_effect = status_responses
 
-        # Test each possible status
         for status in [
             ConversationStatus.COMPLETED,
             ConversationStatus.FAILED,
@@ -146,17 +134,14 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
             ConversationStatus.DELETED
         ]:
             with self.subTest(status=status):
-                # Reset mocks for each subtest
                 self.conversation_repository.get_by_id.reset_mock()
                 self.conversation_repository.update.reset_mock()
                 self.conversation = ConversationEntity(user=self.user, _id=self.conversation_id)
                 self.conversation_repository.get_by_id.return_value = self.conversation
                 self.conversation_repository.update.return_value = self.conversation
 
-                # Act
                 result = self.use_case.execute(self.conversation_id, status)
 
-                # Assert
                 self.assertEqual(result.status, status)
                 self.assertEqual(result.summary, f"Summary for {status.value}")
                 self.assertEqual(result.extracted_data, f"Extraction for {status.value}")
@@ -164,18 +149,15 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
                 self.conversation_repository.update.assert_called_once_with(self.conversation)
 
     def test_only_one_system_prompt_in_memory(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.conversation_repository.update.return_value = self.conversation
 
-        # Create a list to store conversations passed to update
         saved_conversations = []
         def capture_conversation(conversation):
             saved_conversations.append(conversation)
             return conversation
         self.conversation_repository.update.side_effect = capture_conversation
 
-        # Mock LLM responses with valid data
         def generate_response(conversation):
             if conversation.system_prompt.content == SYSTEM_PROMPT_SUMMARY:
                 return MessageEntity(role=MessageRole.ASSISTANT, content="Test summary")
@@ -183,22 +165,16 @@ class TestCreateConversationSummaryUseCase(unittest.TestCase):
                 return MessageEntity(role=MessageRole.ASSISTANT, content='{"key": "value"}')
         self.llm_service.generate_response.side_effect = generate_response
 
-        # Act
         self.use_case.execute(self.conversation_id, ConversationStatus.COMPLETED)
 
-        # Assert
-        # Verify the final conversation state that was saved
         final_conversation = saved_conversations[-1]
         self.assertEqual(final_conversation.system_prompt.content, SYSTEM_PROMPT_DATE_EXTRACTION)
 
     def test_update_system_prompt_replaces_previous(self):
-        # Arrange
         first_prompt = MessageEntity(role=MessageRole.SYSTEM, content="First prompt")
         second_prompt = MessageEntity(role=MessageRole.SYSTEM, content="Second prompt")
         
-        # Act
         self.conversation.update_system_prompt(first_prompt)
         self.conversation.update_system_prompt(second_prompt)
         
-        # Assert
         self.assertEqual(self.conversation.system_prompt.content, "Second prompt")

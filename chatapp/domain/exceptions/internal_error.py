@@ -13,3 +13,4 @@ class InternalError(DomainError):
             status=500,
             details=details
         )
+        

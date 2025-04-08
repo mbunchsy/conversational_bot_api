@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'environments', '.env.local')
+env_path = os.path.join('ENV_FILE', os.path.dirname(os.path.dirname(__file__)), 'environments', '.env.local')
 load_dotenv(env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

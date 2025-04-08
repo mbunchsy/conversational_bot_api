@@ -1,9 +1,13 @@
 import os
 import logging
 from typing import List
-from openai import OpenAI
+from chatapp.domain.exceptions.llm.authentication_error import LLMAuthenticationError
+from chatapp.domain.exceptions.llm.connection_error import LLMConnectionError
+from chatapp.domain.exceptions.llm.generic_error import LLMGenericError
+from openai import OpenAI, APIError, RateLimitError, APIConnectionError, APITimeoutError, InternalServerError
 from pgvector.django import L2Distance
 from chatapp.infrastructure.models.document_db import DocumentDB
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +22,15 @@ class RAGRetrieverService:
         self.client = OpenAI(api_key=apiKey)
         logger.info("RAGRetrieverService initialized successfully")
 
+    @retry(
+        retry=retry_if_exception_type((APIConnectionError, RateLimitError, APITimeoutError, InternalServerError)),
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        reraise=True
+    )
     def get_embedding(self, text: str) -> List[float]:
         try:
-            logger.info("🔍 Getting embedding for query")
+            logger.info("Getting embedding for query")
             response = self.client.embeddings.create(
                 input=text,
                 model="text-embedding-ada-002"

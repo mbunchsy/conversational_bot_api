@@ -9,7 +9,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     env_file:
-      - ./environments/.env.local
+      - ./environments/.env.docker
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
@@ -28,7 +28,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./environments/.env.local
+      - ./environments/.env.docker
     depends_on:
       db:
         condition: service_healthy

@@ -26,3 +26,4 @@ class DomainError(Exception, ABC):
             "message": self.message,
             "details": self.details
         }
+        

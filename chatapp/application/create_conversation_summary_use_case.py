@@ -105,7 +105,7 @@ class CreateConversationSummaryUseCase:
         self._conversation_repository = conversation_repository
         self._llm_service = llm_service
 
-    def execute(self, conversation_id: str, conversation_status: ConversationStatus) -> None:
+    def execute(self, conversation_id: str, conversation_status: ConversationStatus) -> ConversationEntity:
         try:
             conversation = self._conversation_repository.get_by_id(conversation_id)
             if not conversation:
@@ -127,7 +127,8 @@ class CreateConversationSummaryUseCase:
             
             conversation.update_status(conversation_status)
         
-            return self._conversation_repository.update(conversation)
+            updated_conversation = self._conversation_repository.update(conversation)
+            return updated_conversation
         except NotFoundError:
             raise
         except Exception as e:

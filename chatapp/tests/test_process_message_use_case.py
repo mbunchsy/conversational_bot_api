@@ -14,18 +14,18 @@ class TestProcessMessageUseCase(unittest.TestCase):
     def setUp(self):
         self.llm_service = Mock()
         self.conversation_repository = Mock()
+        self.rag_service = Mock()
         self.use_case = ProcessMessageUseCase(
             llm_service=self.llm_service,
-            conversation_repository=self.conversation_repository
+            conversation_repository=self.conversation_repository,
+            rag_service=self.rag_service
         )
         
-        # Common test data
         self.user = UserEntity(_id=str(uuid4()), name="Test User")
         self.conversation_id = str(uuid4())
         self.conversation = ConversationEntity(user=self.user, _id=self.conversation_id)
 
     def test_process_message_successfully(self):
-        # Arrange
         user_message = MessageEntity(role=MessageRole.USER, content="Hello")
         message_input = CreateMessageInput(
             conversation_id=self.conversation_id,
@@ -38,20 +38,17 @@ class TestProcessMessageUseCase(unittest.TestCase):
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.conversation_repository.update.return_value = self.conversation
 
-        # Act
         result = self.use_case.execute(message_input)
 
-        # Assert
         self.assertEqual(result, self.conversation)
-        self.assertEqual(len(result.messages), 2)  # User message + LLM response
-        self.assertEqual(result.messages[-2], user_message)  # Second to last message should be user's
-        self.assertEqual(result.messages[-1], llm_response)  # Last message should be LLM's
+        self.assertEqual(len(result.messages), 2)
+        self.assertEqual(result.messages[-2], user_message)
+        self.assertEqual(result.messages[-1], llm_response)
         self.conversation_repository.get_by_id.assert_called_once_with(self.conversation_id)
         self.llm_service.generate_response.assert_called_once_with(self.conversation)
         self.conversation_repository.update.assert_called_once_with(self.conversation)
 
     def test_conversation_not_found(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = None
         message_input = CreateMessageInput(
             conversation_id=self.conversation_id,
@@ -59,7 +56,6 @@ class TestProcessMessageUseCase(unittest.TestCase):
             language="es"
         )
 
-        # Act & Assert
         with self.assertRaises(NotFoundError) as context:
             self.use_case.execute(message_input)
         
@@ -69,7 +65,6 @@ class TestProcessMessageUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_not_called()
 
     def test_llm_service_error(self):
-        # Arrange
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.llm_service.generate_response.side_effect = Exception("LLM Error")
         message_input = CreateMessageInput(
@@ -78,7 +73,6 @@ class TestProcessMessageUseCase(unittest.TestCase):
             language="es"
         )
 
-        # Act & Assert
         with self.assertRaises(InternalError) as context:
             self.use_case.execute(message_input)
         
@@ -88,7 +82,6 @@ class TestProcessMessageUseCase(unittest.TestCase):
         self.conversation_repository.update.assert_not_called()
 
     def test_message_order_preserved(self):
-        # Arrange
         existing_message = MessageEntity(role=MessageRole.USER, content="Previous message")
         self.conversation.add_message(existing_message)
         
@@ -104,17 +97,14 @@ class TestProcessMessageUseCase(unittest.TestCase):
         self.conversation_repository.get_by_id.return_value = self.conversation
         self.conversation_repository.update.return_value = self.conversation
 
-        # Act
         result = self.use_case.execute(message_input)
 
-        # Assert
         self.assertEqual(len(result.messages), 3)
         self.assertEqual(result.messages[0], existing_message)
         self.assertEqual(result.messages[1], new_message)
         self.assertEqual(result.messages[2], llm_response)
 
     def test_conversation_updated_correctly(self):
-        # Arrange
         original_conversation = ConversationEntity(user=self.user, _id=self.conversation_id)
         updated_conversation = ConversationEntity(user=self.user, _id=self.conversation_id)
         
@@ -131,13 +121,12 @@ class TestProcessMessageUseCase(unittest.TestCase):
         self.llm_service.generate_response.return_value = llm_response
         self.conversation_repository.update.return_value = updated_conversation
 
-        # Act
         result = self.use_case.execute(message_input)
 
-        # Assert
         self.assertEqual(result, updated_conversation)
         self.conversation_repository.update.assert_called_once()
         conversation_to_update = self.conversation_repository.update.call_args[0][0]
         self.assertEqual(len(conversation_to_update.messages), 2)
         self.assertEqual(conversation_to_update.messages[0], message)
         self.assertEqual(conversation_to_update.messages[1], llm_response)
+        

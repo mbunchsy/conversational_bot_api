@@ -40,6 +40,7 @@ class Container(containers.DeclarativeContainer):
         ProcessMessageAudioUseCase,
         llm_service=llm_service,
         conversation_repository=conversation_repository,
+        rag_service=rag_service
     )
 
     process_message_use_case = providers.Factory(

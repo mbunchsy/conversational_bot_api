@@ -46,3 +46,4 @@ class ProcessMessageUseCase:
                 message="Error processing the prompt",
                 details={"original_error": str(e)}
             )
+            
