@@ -31,9 +31,10 @@ class RAGRetrieverService:
     def get_embedding(self, text: str) -> List[float]:
         try:
             logger.info("Getting embedding for query")
+            text=text.replace('\n', ' ')
             response = self.client.embeddings.create(
-                input=text,
-                model="text-embedding-ada-002"
+                input=[text],
+                model="text-embedding-3-small"
             )
             return response.data[0].embedding
         except AuthenticationError as e:
